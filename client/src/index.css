@@ -1,0 +1,82 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+
+@import "tailwindcss";
+@plugin "daisyui" {
+    themes: false;
+}
+
+@theme {
+    --color-primary:#F84565;
+    --color-primary-dull:#D63854;
+}   
+
+* {
+    font-family: "Outfit", sans-serif;
+    scrollbar-width: thin;
+    scrollbar-color: #787777 #1e1e1e;
+}
+body{
+    color: white;
+    background-color: #09090B;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+@keyframes search-scan {
+    0%   { transform: translate(0, 0) rotate(0deg); }
+    25%  { transform: translate(3px, -3px) rotate(-12deg); }
+    50%  { transform: translate(0, -4px) rotate(0deg); }
+    75%  { transform: translate(-3px, -2px) rotate(12deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+.animate-search-scan {
+    animation: search-scan 1.6s ease-in-out infinite;
+}
+.no-scrollbar{
+    scrollbar-width: none;
+}
+
+
+@keyframes shimmer {
+    100% { transform: translateX(100%); }
+}
+
+@keyframes skeleton-fade-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.skeleton {
+    position: relative;
+    overflow: hidden;
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.09),
+        transparent
+    );
+    animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.animate-skeleton-in {
+    animation: skeleton-fade-in 0.4s ease-out both;
+}
