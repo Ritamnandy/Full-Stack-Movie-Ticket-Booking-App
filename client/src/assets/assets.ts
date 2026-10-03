@@ -272,8 +272,23 @@ export const dummyDateTimeData: ShowsByDate = {
     ]
 }
 
+export type DashBoardType = {
+    totalBookings: number;
+    totalRevenue: number;
+    totalUser: number;
+    activeShows: {
+        _id: string;
+        movie: DummyShow;
+        showDateTime: string;
+        showPrice: number;
+        occupiedSeats: {
+            [key: string]: string;
+        };
+    }[];
+}
 
-export const dummyDashboardData = {
+
+export const dummyDashboardData: DashBoardType = {
     "totalBookings": 14,
     "totalRevenue": 1517,
     "totalUser": 5,
@@ -328,7 +343,6 @@ export const dummyDashboardData = {
                 "B2": "user_2xO4XPCgWWwWq9EHuQxc5UWqIok",
                 "B3": "user_2xO4XPCgWWwWq9EHuQxc5UWqIok"
             },
-            "__v": 0
         },
         {
             "_id": "68380044686d454f2116b39a",

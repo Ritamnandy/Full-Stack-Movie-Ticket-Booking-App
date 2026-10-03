@@ -81,6 +81,6 @@ html {
     animation: skeleton-fade-in 0.4s ease-out both;
 }
 
-@media (hover: hover) and (pointer: fine) {
+/* @media (hover: hover) and (pointer: fine) {
     * { cursor: none !important; }
-}
+} */
