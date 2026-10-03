@@ -344,7 +344,25 @@ export const dummyDashboardData = {
 }
 
 
-export const dummyBookingData = [
+
+export type BookingType = {
+    _id: string,
+    user: {
+        name: string
+    },
+    show: {
+        _id: string
+        movie: DummyShow
+        showDateTime: string
+        showPrice: number
+    }
+    amount: number
+    bookedSeats: string[]
+    isPaid: boolean
+}
+
+
+export const dummyBookingData: BookingType[] = [
     {
         "_id": "68396334fb83252d82e17295",
         "user": { "name": "GreatStack", },

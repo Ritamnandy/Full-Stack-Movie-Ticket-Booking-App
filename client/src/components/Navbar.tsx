@@ -18,11 +18,24 @@ export default function Navbar ()
 {
     const [ isSearchOpen, setIsSearchOpen ] = useState( false );
     const [ isMenuOpen, setIsMenuOpen ] = useState( false );
+
     const searchInputRef = useRef<HTMLInputElement>( null );
     const searchBarRef = useRef<HTMLDivElement>( null );
     const { user } = useUser()
     const { openSignIn } = useClerk()
     const navigate = useNavigate()
+    const [ searchValue, setSearchValue ] = useState( "" );
+
+    const handleSearch = () =>
+    {
+        const query = searchValue.trim();
+        if ( !query ) return;
+
+        navigate( `/movies?search=${ encodeURIComponent( query ) }` );
+        setIsSearchOpen( false );
+        setSearchValue( "" );
+        window.scrollTo( 0, 0 );
+    };
 
     useEffect( () =>
     {
@@ -110,7 +123,7 @@ export default function Navbar ()
                 isSearchOpen && (
                     <div
                         ref={ searchBarRef }
-                        className="absolute top-20 right-52 w-88 rounded-full p-[1.5px]
+                        className="absolute top-20 right-52 md:right-30 w-88 rounded-full p-[1.5px]
                        bg-linear-to-r from-primary via-pink-500 to-primary
                        shadow-lg shadow-primary/20 transition-shadow duration-300
                        focus-within:shadow-primary/50 focus-within:shadow-2xl
@@ -132,6 +145,13 @@ export default function Navbar ()
 
                             <input
                                 type="text"
+                                value={ searchValue }
+                                onChange={ ( e ) => setSearchValue( e.target.value ) }
+                                onKeyDown={ ( e ) =>
+                                {
+                                    if ( e.key === "Enter" ) handleSearch();
+                                    if ( e.key === "Escape" ) setIsSearchOpen( false );
+                                } }
                                 ref={ searchInputRef }
                                 placeholder="Search movies, theatres..."
                                 className="flex-1 h-full bg-transparent text-sm text-white placeholder-gray-500 focus:outline-none"
