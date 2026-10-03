@@ -80,3 +80,7 @@ html {
 .animate-skeleton-in {
     animation: skeleton-fade-in 0.4s ease-out both;
 }
+
+@media (hover: hover) and (pointer: fine) {
+    * { cursor: none !important; }
+}
