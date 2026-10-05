@@ -84,3 +84,12 @@ html {
 /* @media (hover: hover) and (pointer: fine) {
     * { cursor: none !important; }
 } */
+
+input::-webkit-inner-spin-button,
+input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+}
+
+::-webkit-calendar-picker-indicator{
+    filter: invert(1);
+}

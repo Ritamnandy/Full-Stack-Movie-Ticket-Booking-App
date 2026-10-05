@@ -48,7 +48,7 @@ export default function App ()
             <Route path="/admin/*" element={ <LayOut /> } >
             
               <Route index element={ <DashBoard /> } />
-              <Route path="add-show" element={ <AddShow /> } />
+              <Route path="add-shows" element={ <AddShow /> } />
               <Route path="list-shows" element={ <ListShow /> } />
               <Route path="list-bookings" element={ <ListBooking /> } />
             </Route>
