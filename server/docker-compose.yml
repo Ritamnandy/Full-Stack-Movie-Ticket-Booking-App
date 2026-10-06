@@ -1,0 +1,23 @@
+services:
+
+  mongoDB:
+    image: mongo:7
+    container_name: mongoDB
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: always
+
+  redisCache:
+    image: redis:8-alpine
+    container_name: redisCache
+    ports:
+      - "6379:6379"
+    restart: always
+    volumes:
+      - redis_data:/var/lib/redis
+
+volumes:
+  mongo_data:
+  redis_data:

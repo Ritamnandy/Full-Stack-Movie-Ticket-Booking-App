@@ -1,9 +1,13 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { assets } from "../assets/assets";
-import { MenuIcon, SearchIcon, TicketPlus, XIcon } from "lucide-react";
+import { MenuIcon, SearchIcon, XIcon } from "lucide-react";
 import LoginBtn from "./subComponents/LoginBtn";
 import { useEffect, useRef, useState } from "react";
-import { useClerk, UserButton, useUser } from "@clerk/react";
+import LoginModal from "./LoginModal";
+import SignupModal from "./SignupModal";
+import EmailVerifyModal from "./EmailVerifyModal";
+import ForgotPasswordModal from "./ForgotPasswordModal";
+import ProfileMenu from "./ProfileMenu";
 
 const MenuLink = [
     { to: "/", label: "Home" },
@@ -18,11 +22,19 @@ export default function Navbar ()
 {
     const [ isSearchOpen, setIsSearchOpen ] = useState( false );
     const [ isMenuOpen, setIsMenuOpen ] = useState( false );
-
+    const [ authModal, setAuthModal ] = useState<"login" | "signup" | "verify" | "forgot" | null>( null );
+    const [ verifyEmail, setVerifyEmail ] = useState( "" );
     const searchInputRef = useRef<HTMLInputElement>( null );
     const searchBarRef = useRef<HTMLDivElement>( null );
-    const { user } = useUser()
-    const { openSignIn } = useClerk()
+    const user = {
+        fullName: "John Doe",
+        username: "johndoe",
+        email: "johndoe@example.com",
+        imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTU8TFJ7iUwyhF0_LOmPpst5aFLBQUYvRcuREn63JTVvg&s=10",
+        role: "user"
+
+    }
+    // const { openSignIn } = useClerk()
     const navigate = useNavigate()
     const [ searchValue, setSearchValue ] = useState( "" );
 
@@ -107,13 +119,22 @@ export default function Navbar ()
                 </span>
                 {
                     !user ? (
-                        <LoginBtn title="Login" onClick={ openSignIn } />
+                        <LoginBtn title="Login" onClick={ () => setAuthModal( 'login' ) } />
                     ) : (
-                        <UserButton>
-                            <UserButton.MenuItems>
-                                <UserButton.Action label="My Booking" labelIcon={ <TicketPlus width={ 15 } /> } onClick={ () => navigate( '/my-bookings' ) } />
-                            </UserButton.MenuItems>
-                        </UserButton>
+                        <ProfileMenu
+                            user={ {
+                                email: user.email,
+                                name: user.fullName,
+                                avatar: user.imageUrl,
+                                isAdmin: user.role === 'admin'
+                            } }
+                            onLogout={ async () =>
+                            {
+                                // await api.post("/auth/logout")
+                                // clear your auth state here
+                                navigate( "/" );
+                            } }
+                        />
                     )
                 }
             </div>
@@ -165,6 +186,67 @@ export default function Navbar ()
                     </div>
                 )
             }
+
+            <LoginModal
+                isOpen={ authModal === "login" }
+                onClose={ () => setAuthModal( null ) }
+                onSwitchToSignup={ () => setAuthModal( "signup" ) }
+                onForgotPassword={ () => setAuthModal( "forgot" ) }
+                onSubmit={ async ( data ) =>
+                {
+                    console.log( 'Login function called ', data );
+                } }
+            />
+
+            <SignupModal
+                isOpen={ authModal === "signup" }
+                onClose={ () => setAuthModal( null ) }
+                onSwitchToLogin={ () => setAuthModal( "login" ) }
+                onSubmit={ async ( { name, email, password } ) =>
+                {
+                    console.log( 'Signup function called ', { name, email, password } );
+                    setVerifyEmail( email );
+                    setAuthModal( 'verify' );
+
+                } }
+            />
+
+            <EmailVerifyModal
+                isOpen={ authModal === "verify" }
+                email={ verifyEmail }
+                onClose={ () => setAuthModal( null ) }
+                onChangeEmail={ () => setAuthModal( "signup" ) }
+                onVerify={ async ( code ) =>
+                {
+                    setTimeout( () =>
+                    {
+                        console.log( code );
+                        console.log( verifyEmail );
+
+                        // setAuthModal( null );
+                    }, 2000 );
+                } }
+                onResend={ async () =>
+                {
+                    // await api.post("/auth/resend-code", { email: verifyEmail })
+                } }
+            />
+
+            <ForgotPasswordModal
+                isOpen={ authModal === "forgot" }
+                onClose={ () => setAuthModal( null ) }
+                onBackToLogin={ () => setAuthModal( "login" ) }
+                onSubmit={ async ( email ) =>
+                {
+                    console.log( 'Forgot password submitted with email:', email );
+
+                } }
+                onResend={ async ( email ) =>
+                {
+                    console.log( 'Resend code requested for email:', email );
+                } }
+            />
+
         </div>
     )
-}
+} 
