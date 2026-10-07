@@ -1,8 +1,8 @@
 import { CanActivate, ExecutionContext, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JsonWebTokenError, JwtService, NotBeforeError, TokenExpiredError } from '@nestjs/jwt';
-import { Observable } from 'rxjs';
-import type { AuthenticatedRequest } from '../types/authentication.type.js';
+import type { AuthenticatedRequest } from '../../modules/auth/types/authentication.type.js';
+
 
 @Injectable()
 export class JwtauthGuard implements CanActivate
@@ -24,23 +24,16 @@ export class JwtauthGuard implements CanActivate
   {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const token = this.extractTokenFromCookie( request );
-
+    this.logger.log( 'Extracted token:', token );
     if ( !token )
     {
-      this.logger.warn( 'No authentication token found' )
       throw new UnauthorizedException( 'No authentication token found' )
     }
 
     try
     {
-      const secret = this.configService.getOrThrow<string>( 'JWT_SECRET' );
-      if ( !secret )
-      {
-        this.logger.error( 'JWT_SECRET is not configured' );
-        throw new UnauthorizedException();
-      }
       const payload = await this.jwtService.verifyAsync( token, {
-        secret
+        secret: this.configService.getOrThrow<string>( 'JWT_SECRET' )
       } )
       request.user = payload
     } catch ( error )
@@ -55,6 +48,7 @@ export class JwtauthGuard implements CanActivate
       }
       if ( error instanceof JsonWebTokenError )
       {
+        this.logger.error( 'Invalid authentication token:', error.message );
         throw new UnauthorizedException( 'Invalid access token provided' );
       }
       this.logger.warn( 'Invalid authentication token' )
@@ -69,8 +63,10 @@ export class JwtauthGuard implements CanActivate
   private extractTokenFromCookie ( request: AuthenticatedRequest ): string | undefined
   {
     const cookieHeader = request.cookies[ 'accessToken' ];
+    // this.logger.log( 'Extracting token from cookie:', cookieHeader );
     if ( cookieHeader )
     {
+
       return cookieHeader;
     }
     return this.extractTokenFromHeader( request );
@@ -79,6 +75,7 @@ export class JwtauthGuard implements CanActivate
   extractTokenFromHeader ( request: AuthenticatedRequest ): string | undefined
   {
     const authHeader = request.header( 'Authorization' )
+    // this.logger.log( 'Extracting token from header:', authHeader );
     if ( !authHeader )
     {
       return undefined;

@@ -10,14 +10,14 @@ import { ResendOtpDto } from './dto/resendotp.dto.js';
 import { VerifyEmailDto } from './dto/verifyEmail.dto.js';
 import { LoginDto } from './dto/login.dto.js';
 import { RefreshTokenDto } from './dto/refreshToken.dto.js';
-import { JwtauthGuard } from './jwtauthGuard/jwtauth.guard.js';
 import type { AuthenticatedRequest } from './types/authentication.type.js';
 import { ResetPasswordDto } from './dto/resetPassword.dto.js';
-import { RoleGuard } from './roleGuard/role.guard.js';
 import { Roles } from '../../common/role/role.decorator.js';
-import { UserRole } from '../generated/prisma/enums.js';
+import { UserRole } from '../../common/enum/enum.js';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { GoogleOauthBody } from './types/googleauthbody.types.js';
+import { JwtauthGuard } from '../../common/jwtauthGuard/jwtauth.guard.js';
+import { RoleGuard } from '../../common/roleGuard/role.guard.js';
 
 @Controller( 'auth' )
 export class AuthController
