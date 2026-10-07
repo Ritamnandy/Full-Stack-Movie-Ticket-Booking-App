@@ -14,7 +14,7 @@ import { JwtauthGuard } from './jwtauthGuard/jwtauth.guard.js';
 import type { AuthenticatedRequest } from './types/authentication.type.js';
 import { ResetPasswordDto } from './dto/resetPassword.dto.js';
 import { RoleGuard } from './roleGuard/role.guard.js';
-import { Roles } from './role/role.decorator.js';
+import { Roles } from '../../common/role/role.decorator.js';
 import { UserRole } from '../generated/prisma/enums.js';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { GoogleOauthBody } from './types/googleauthbody.types.js';

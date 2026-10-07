@@ -1,17 +1,17 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
-import { PrismaModule } from './prisma/prisma.module.js';
-import { AuthModule } from './auth/auth.module.js';
-import { RedisModule } from './redis/redis.module.js';
+import { AuthModule } from './modules/auth/auth.module.js';
+import { RedisModule } from './modules/redis/redis.module.js';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { RedisService } from './redis/redis.service.js';
+import { RedisService } from './modules/redis/redis.service.js';
 import { BullModule } from '@nestjs/bullmq';
-import { MailsModule } from './mails/mails.module.js';
-import { ImagesModule } from './images/images.module.js';
+import { MailsModule } from './modules/mails/mails.module.js';
+import { ImagesModule } from './modules/images/images.module.js';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { DatabaseModule } from './database/database.module.js';
 
 @Module( {
   imports: [
@@ -21,9 +21,9 @@ import { APP_GUARD } from '@nestjs/core';
     JwtModule.register( {
       global: true,
     } ),
-    PrismaModule,
     AuthModule,
     RedisModule,
+    DatabaseModule,
     BullModule.forRootAsync( {
       imports: [ RedisModule ],
       useFactory: ( redis: RedisService ) => ( {
@@ -51,6 +51,6 @@ import { APP_GUARD } from '@nestjs/core';
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
-   ],
+  ],
 } )
 export class AppModule { }

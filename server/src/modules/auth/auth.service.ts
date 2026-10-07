@@ -2,10 +2,6 @@ import { BadRequestException, ConflictException, HttpException, HttpStatus, Inje
 import { CreateAuthDto } from './dto/create-auth.dto.js';
 import { UpdateAuthDto } from './dto/update-auth.dto.js';
 import { JsonWebTokenError, JwtService, NotBeforeError, TokenExpiredError } from '@nestjs/jwt';
-import { AuthRepository } from './repository/auth.repository.js';
-import { ConfigService } from '@nestjs/config';
-import { RedisService } from '../redis/redis.service.js';
-import { MailsService } from '../mails/mails.service.js';
 import type { JwtAccessTokenPaload, JwtRefreshTokenPaload } from './types/tokenPayload.typs.js';
 import { apiMessage, comparePassword, generateOtp, hashedCryptoToken, hashPassword, rowCryptoToken, safeEqual, sha256 } from './utils/constants.js';
 import { OTP_EXPIRY, OTP_RESEND_COOLDOWN, otpCooldownKey, otpKey, PROFILE_DATA_EXPIRY, profileKey, REGISTER_DATA_EXPIRY, registerKey, ResetPasswordLink, resetTokenKey } from './utils/rediskey.js';
@@ -14,7 +10,12 @@ import { VerifyEmailDto } from './dto/verifyEmail.dto.js';
 import { LoginDto } from './dto/login.dto.js';
 import { ResetPasswordDto } from './dto/resetPassword.dto.js';
 import type { GoogleOauthBody } from './types/googleauthbody.types.js';
+import { RedisService } from '../redis/redis.service.js';
+import { MailsService } from '../mails/mails.service.js';
 import { ImagesService } from '../images/images.service.js';
+import { ConfigService } from '@nestjs/config';
+import { UsersRepository } from '../users/users.repository.js';
+
 
 @Injectable()
 export class AuthService
@@ -25,7 +26,7 @@ export class AuthService
     private readonly redisService: RedisService,
     private readonly mailsService: MailsService,
     private readonly configService: ConfigService,
-    private readonly authRepository: AuthRepository,
+    private readonly authRepository: UsersRepository,
     private readonly jwtService: JwtService,
     private readonly imageServce: ImagesService
   )
@@ -384,7 +385,6 @@ export class AuthService
       name: result.name,
       role: result.role,
       image: result.profileImage,
-      createAt: result.createdAt
     } ), PROFILE_DATA_EXPIRY )
     return apiMessage( 'User retrieved successfully', result )
   }
@@ -494,6 +494,14 @@ export class AuthService
     }
     await this.redisService.deleteData( `user:profile:${ userId }` )
     return apiMessage( 'User profile image set successfully', { imageUrl: response.profileImage } )
+  }
+
+  async deleteUserPermanently ( userId: string )
+  {
+    const response = await this.authRepository.deleteUser( userId )
+
+    return apiMessage( 'User deleted successfully' )
+
   }
 
 
