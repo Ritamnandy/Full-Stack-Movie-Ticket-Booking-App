@@ -10,6 +10,8 @@ import { RedisService } from './redis/redis.service.js';
 import { BullModule } from '@nestjs/bullmq';
 import { MailsModule } from './mails/mails.module.js';
 import { ImagesModule } from './images/images.module.js';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module( {
   imports: [
@@ -29,10 +31,26 @@ import { ImagesModule } from './images/images.module.js';
       } ),
       inject: [ RedisService ],
     } ),
+    ThrottlerModule.forRoot( {
+      throttlers: [
+        {
+          name: "default",
+          ttl: 60000,
+          limit: 100,
+        },
+
+      ],
+      errorMessage: 'Too many requests. Please try again later.',
+    } ),
     MailsModule,
     ImagesModule,
   ],
   controllers: [ AppController ],
-  providers: [ AppService ],
+  providers: [ AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+   ],
 } )
 export class AppModule { }

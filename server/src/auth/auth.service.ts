@@ -464,7 +464,10 @@ export class AuthService
     // 10. Generate token pair
     const { accessToken, refreshToken } = await this.generateTokenPair( jwtAccessToken, jwtRefreshToken )
     this.logger.log( `User logged in with google` )
-
+    await this.mailsService.sendWelcomeMail( {
+      name: user.name,
+      to: user.email
+    } )
     // 11. Return response
     return apiMessage( 'User logged in successfully', {}, accessToken, refreshToken )
   }
