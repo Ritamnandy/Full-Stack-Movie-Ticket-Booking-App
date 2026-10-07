@@ -1,10 +1,9 @@
 import { Processor, WorkerHost, OnWorkerEvent } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { Job } from 'bullmq';
-import { Resend } from 'resend';
 import { EMAIL_QUEUE, PasswordChangedMail, ResetPasswordMail, VerifyEmailMail, WellComeMail } from './constants.js';
 import type { ChangedPasswordConfirmation, ResetPassword, VerifyEmail, WellcomeMail } from './types/mail.types.js';
+import Nodemailer, { Transporter } from 'nodemailer';
 import
 {
     welcomeTemplate,
@@ -14,23 +13,47 @@ import
 } from './mail.templates.js';
 
 
-
-@Processor( EMAIL_QUEUE, { concurrency: 5, limiter: { max: 2, duration: 1000 } } )
+@Processor( EMAIL_QUEUE )
 export class MailProcessor extends WorkerHost
 {
     private readonly logger = new Logger( MailProcessor.name );
-    private readonly resend: Resend;
+    private readonly transporter: Transporter;
 
-    constructor ( private readonly config: ConfigService )
+    constructor ()
     {
         super();
-        this.resend = new Resend( this.config.get( 'RESEND_API_KEY' ) );
+        this.transporter = Nodemailer.createTransport( {
+            service: 'gmail',
+            auth: {
+                user: process.env.MAIL_USER as string,
+                pass: process.env.MAIL_PASSWORD as string,
+            },
+        } );
+        // this.onModuleInit()
+        // this.mailgen = new Mailgen( {
+        //     theme: 'default',
+        //     product: {
+        //         name: 'QuickShow',
+        //         link: 'https://nestjs.com',
+        //     },
+        // } );
+    }
+    async onModuleInit ()
+    {
+        try
+        {
+            await this.transporter.verify()
+            this.logger.log( 'SMTP connection OK' )
+        } catch ( error )
+        {
+            this.logger.error( 'SMTP connection FAILED', error instanceof Error ? error.message : String( error ) )
+        }
     }
 
     async process ( job: Job )
     {
         this.logger.log(
-            `Processing job "${ job.name }" (id: ${ job.id }) for ${ job.data ?? 'unknown' }`,
+            `Processing job "${ job.name }" (id: ${ job.id })`,
         );
 
         try
@@ -40,22 +63,27 @@ export class MailProcessor extends WorkerHost
             {
                 case WellComeMail:
                     result = await this.sendWelcomeEmail( job.data );
+                    // result = await this.testMail();
+                    this.logger.log( 'Welcome email sent job processed' );
                     break;
                 case VerifyEmailMail:
                     result = await this.sendVerifyEmailMail( job.data );
+                    this.logger.log( 'Verify email sent job processed' );
                     break;
                 case ResetPasswordMail:
                     result = await this.sendResetPasswordMail( job.data );
+                    this.logger.log( 'Reset password email sent job processed' );
                     break;
                 case PasswordChangedMail:
                     result = await this.sendPasswordChangedMail( job.data );
+                    this.logger.log( 'Password changed email sent job processed' );
                     break;
                 default:
                     throw new Error( `Unknown mail job: ${ job.name }` );
             }
 
             this.logger.log(
-                `Job "${ job.name }" (id: ${ job.id }) sent — messageId: ${ result.id }`,
+                `Job "${ job.name }" (id: ${ job.id }) sent — messageId: ${ result.messageId }`,
             );
             return result;
         } catch ( err )
@@ -68,6 +96,28 @@ export class MailProcessor extends WorkerHost
         }
     }
 
+    private async testMail ()
+    {
+        try
+        {
+            const info = await this.transporter.sendMail( {
+                from: `"QuickShow" <${ process.env.MAIL_USER }>`,
+                to: 'nandyritam11@gmail.com',
+                subject: 'QuickShow Test Mail',
+                text: 'Hello from QuickShow',
+                html: '<h1>Hello from QuickShow</h1>',
+            } );
+
+            console.log( 'MAIL SENT:', info.messageId );
+
+            return info;
+        } catch ( error )
+        {
+            console.error( 'MAIL SEND ERROR:', error );
+            throw error;
+        }
+    }
+
 
     private async sendMail (
         to: string,
@@ -75,18 +125,20 @@ export class MailProcessor extends WorkerHost
         html: string,
     )
     {
-        const { data, error } = await this.resend.emails.send( {
-            from: this.config.getOrThrow( 'MAIL_FROM' )!,
+        const info = await this.transporter.sendMail( {
+            from: `"QuickShow" <${ process.env.MAIL_USER as string }>`,
             to,
             subject,
             html,
         } );
-
-        // Resend returns { data, error } instead of throwing,
-        // so you must throw yourself for BullMQ to retry.
-        if ( error ) throw new Error( `${ error.name }: ${ error.message }` );
-
-        return data; // { id: '...' }
+        this.logger.log(
+            `Mail response:
+        messageId=${ info.messageId }
+        accepted=${ JSON.stringify( info.accepted ) }
+        rejected=${ JSON.stringify( info.rejected ) }
+        response=${ info.response }`,
+        );
+        return info;
 
     }
 
@@ -94,11 +146,12 @@ export class MailProcessor extends WorkerHost
 
     private sendWelcomeEmail ( { to, name }: WellcomeMail )
     {
-        return this.sendMail( to, `Welcome to YourApp!`, welcomeTemplate( name ) );
+        return this.sendMail( to, `Welcome to QuickShow!`, welcomeTemplate( name ) );
     }
 
     private sendVerifyEmailMail ( { to, name, otp }: VerifyEmail )
     {
+        this.logger.log( `Sending verify email data: ${ JSON.stringify( { to, name, otp } ) }` );
         return this.sendMail( to, 'Verify your email', verifyEmailTemplate( otp, name, 5 ) );
     }
 

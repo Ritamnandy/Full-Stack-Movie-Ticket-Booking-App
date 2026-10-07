@@ -1,7 +1,7 @@
 // mail/mail.templates.ts
-const APP_NAME = 'YourApp';
+const APP_NAME = 'QuickShow';
 const BRAND_COLOR = '#4f46e5';
-const SUPPORT_EMAIL = 'support@yourdomain.com';
+const SUPPORT_EMAIL = 'support@quickshow.com';
 
 export const escapeHtml = (value = ''): string =>
   value
