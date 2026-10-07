@@ -9,6 +9,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { RedisService } from './redis/redis.service.js';
 import { BullModule } from '@nestjs/bullmq';
 import { MailsModule } from './mails/mails.module.js';
+import { ImagesModule } from './images/images.module.js';
 
 @Module( {
   imports: [
@@ -29,6 +30,7 @@ import { MailsModule } from './mails/mails.module.js';
       inject: [ RedisService ],
     } ),
     MailsModule,
+    ImagesModule,
   ],
   controllers: [ AppController ],
   providers: [ AppService ],
