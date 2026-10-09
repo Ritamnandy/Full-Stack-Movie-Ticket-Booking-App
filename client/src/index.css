@@ -122,3 +122,23 @@ input::-webkit-outer-spin-button {
 
 .animate-backdrop-in { animation: modal-backdrop-in 0.25s ease-out both; }
 .animate-card-in     { animation: modal-card-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+
+@keyframes progress-fill {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+}
+
+.animate-progress-fill {
+    transform-origin: left;
+    animation-name: progress-fill;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0) rotate(-6deg); }
+    50%      { transform: translateY(-10px) rotate(6deg); }
+}
+
+.animate-float { animation: float 4s ease-in-out infinite; }

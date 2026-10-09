@@ -5,6 +5,7 @@ import AdminTitle from "../../components/admin/AdminTitle"
 import BlurCircle from "../../components/BlurCircle"
 import { formatDate } from "../../lib/dateFormat"
 import DashboardSkeleton from "../../components/subComponents/DashboardSkeleton"
+import { motion } from "motion/react"
 
 
 
@@ -66,13 +67,13 @@ export default function DashBoard ()
                 <div className="flex flex-wrap gap-4 w-full">
                     {
                         DashBoardCards.map( ( card, index ) => (
-                            <div key={ index } className="flex items-center justify-between px-4 py-3 bg-primary/10 border border-primary/20 rounded-md max-w-50 w-full">
+                            <motion.div key={ index } initial={ { opacity: 0, y: 12 } } animate={ { opacity: 1, y: 0 } } transition={ { delay: index * 0.07, duration: 0.3 } } whileHover={ { y: -3 } } className="flex items-center justify-between px-4 py-3 bg-primary/10 border border-primary/20 rounded-md max-w-50 w-full">
                                 <div>
                                     <h1 className="text-sm text-primary/70">{ card.title }</h1>
                                     <p className="text-xl font-medium mt-1">{ card.value }</p>
                                 </div>
                                 { card.icon }
-                            </div>
+                            </motion.div>
                         ) )
                     }
 
@@ -84,7 +85,7 @@ export default function DashBoard ()
                 <BlurCircle topValue="100px" leftValue="-10%" />
                 {
                     stats.activeShows.map( ( show, index ) => (
-                        <div key={ index } className="w-55 rounded-lg overflow-hidden h-full pb-3 bg-primary/10 border border-primary/20 hover:translate-y-0 transition duration-300 p-2">
+                        <motion.div key={ index } initial={ { opacity: 0, y: 16 } } animate={ { opacity: 1, y: 0 } } transition={ { delay: index * 0.08, duration: 0.35 } } whileHover={ { y: -5 } } className="w-55 rounded-lg overflow-hidden h-full pb-3 bg-primary/10 border border-primary/20 transition duration-300 p-2">
                             <img src={ show.movie.poster_path } alt={ show.movie.title } className="w-full h-60 object-cover rounded-lg" />
                             <p className="p-2 truncate font-medium">{ show.movie.title }</p>
                             <div className="flex items-center justify-between px-2 ">
@@ -102,7 +103,7 @@ export default function DashBoard ()
                                 }
                             </p>
 
-                        </div>
+                        </motion.div>
                     ) )
                 }
 

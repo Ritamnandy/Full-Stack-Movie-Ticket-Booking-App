@@ -17,6 +17,9 @@ import ListShow from "./pages/admin/ListShow"
 import ListBooking from "./pages/admin/ListBooking"
 import ResetPassword from "./components/ResetPasswordPage"
 import MyProfile from "./pages/MyProfile"
+import GoogleSuccess from "./pages/GoogleSuccess"
+import GoogleError from "./pages/GoogleError"
+import NotFound from "./pages/NotFound"
 
 
 
@@ -55,6 +58,8 @@ export default function App ()
             <Route path="/my-bookings" element={ <MyBooking /> } />
             <Route path="/favorite" element={ <Favorite /> } />
             <Route path="/reset-password" element={ <ResetPassword /> } />
+            <Route path="/google/success" element={ <GoogleSuccess /> } />
+            <Route path="/google/error" element={ <GoogleError /> } />
             <Route
               path="/profile"
               element={
@@ -96,7 +101,8 @@ export default function App ()
               <Route path="list-bookings" element={ <ListBooking /> } />
 
             </Route>
-
+            {/* Keep this LAST: any other URL */ }
+            <Route path="*" element={ <NotFound /> } />
           </Routes>
         </motion.main>
       </AnimatePresence>

@@ -3,6 +3,7 @@ import BlurCircle from "./BlurCircle";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { motion } from "motion/react";
 
 type DateSelectProps = {
     dateTime: string;
@@ -45,12 +46,16 @@ export default function DateSelect ( { dateTime, id }: DateSelectProps )
                         <span className="grid grid-cols-3 md:flex flex-wrap md:max-w-lg gap-4">
                             {
                                 Object.keys( dateTime ).slice( 0, 4 ).map( ( key ) => (
-                                    <button key={ key }
+                                    <motion.button key={ key }
                                         onClick={ () => setSelected( key ) }
+                                        whileHover={ { y: -2 } }
+                                        whileTap={ { scale: 0.94 } }
+                                        animate={ { scale: selected === key ? 1.06 : 1 } }
+                                        transition={ { type: "spring", stiffness: 450, damping: 22 } }
                                         className={ `flex flex-col items-center justify-center h-14 w-14 aspect-square rounded cursor-pointer ${ selected === key ? 'bg-primary text-white' : 'border border-primary' }` }>
                                         <span >{ new Date( key ).getDate() }</span>
                                         <span >{ new Date( key ).toLocaleString( "en-US", { month: "short" } ) }</span>
-                                    </button >
+                                    </motion.button >
                                 ) )
                             }
                         </span>
@@ -59,7 +64,7 @@ export default function DateSelect ( { dateTime, id }: DateSelectProps )
 
                 </div>
 
-                <button className="bg-primary text-white px-8 py-2 mt-6 rounded hover:bg-primary/90 transition-all cursor-pointer" onClick={ bookHandler }>Book Now</button>
+                <motion.button whileHover={ { scale: 1.03 } } whileTap={ { scale: 0.96 } } className="bg-primary text-white px-8 py-2 mt-6 rounded hover:bg-primary/90 transition-all cursor-pointer" onClick={ bookHandler }>Book Now</motion.button>
 
             </div>
         </div>

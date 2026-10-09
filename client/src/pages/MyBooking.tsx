@@ -4,6 +4,7 @@ import BlurCircle from "../components/BlurCircle";
 import { formatMovieTime } from "../lib/movieTimeFormat";
 import { formatDate } from "../lib/dateFormat";
 import MyBookingSkeleton from "../components/subComponents/MyBookingSkeleton";
+import { motion } from "motion/react";
 
 
 
@@ -38,7 +39,7 @@ export default function MyBooking ()
 
             {
                 bookings.map( ( booking, index ) => (
-                    <div key={ index } className="flex flex-col md:flex-row justify-between bg-primary/8 border border-primary/20 rounded-lg mt-4 p-2 max-w-3xl">
+                    <motion.article key={ index } initial={ { opacity: 0, y: 16 } } animate={ { opacity: 1, y: 0 } } transition={ { delay: index * 0.08, duration: 0.35, ease: "easeOut" } } className="flex flex-col md:flex-row justify-between bg-primary/8 border border-primary/20 rounded-lg mt-4 p-2 max-w-3xl">
 
 
                         <div className="flex flex-col md:flex-row">
@@ -61,9 +62,9 @@ export default function MyBooking ()
                             <div className="flex items-center gap-4">
                                 <p className="text-2xl font-semibold mb-3">{ currency } { booking.amount }</p>
                                 {
-                                    !booking.isPaid && <button className="bg-primary px-4 py-1.5 mb-3 text-sm rounded-full font-medium cursor-pointer">
+                                    !booking.isPaid && <motion.button whileTap={ { scale: 0.96 } } className="bg-primary px-4 py-1.5 mb-3 text-sm rounded-full font-medium cursor-pointer">
                                         Pay Now
-                                    </button>
+                                    </motion.button>
                                 }
 
                             </div>
@@ -75,7 +76,7 @@ export default function MyBooking ()
 
                         </div>
 
-                    </div>
+                    </motion.article>
                 ) )
             }
 

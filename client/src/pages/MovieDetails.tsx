@@ -6,6 +6,7 @@ import { Heart, PlayCircleIcon, StarIcon } from "lucide-react";
 import DateSelect from "../components/DateSelect";
 import MovieCard from "../components/MovieCard";
 import MovieDetailsSkeleton from "../components/subComponents/MovieDetailsSkeleton";
+import { motion } from "motion/react";
 
 
 
@@ -42,38 +43,38 @@ export default function MovieDetails ()
 
             <div className="flex flex-col md:flex-row gap-8 max-w-6xl mx-auto">
 
-                <img src={ show.poster_path } alt="" className="max-md:mx-auto rounded-lg h-104 max-w-70 object-cover" />
+                <motion.img initial={ { opacity: 0, scale: 0.96 } } animate={ { opacity: 1, scale: 1 } } transition={ { duration: 0.45, ease: "easeOut" } } src={ show.poster_path } alt={ `${ show.title } poster` } className="max-md:mx-auto rounded-lg h-104 max-w-70 object-cover" />
 
-                <div className="relative flex flex-col gap-3">
+                <motion.div initial="hidden" animate="visible" variants={ { hidden: {}, visible: { transition: { staggerChildren: 0.07, delayChildren: 0.08 } } } } className="relative flex flex-col gap-3">
 
                     <BlurCircle topValue="-100px" leftValue="-100px" />
-                    <p className="text-primary">ENGLISH</p>
-                    <h1 className="text-4xl font-semibold max-w-96 text-balance">{ show.title }</h1>
-                    <div className="flex items-center gap-2 text-gray-300">
+                    <motion.p variants={ { hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } } } className="text-primary">ENGLISH</motion.p>
+                    <motion.h1 variants={ { hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } } } className="text-4xl font-semibold max-w-96 text-balance">{ show.title }</motion.h1>
+                    <motion.div variants={ { hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } } } className="flex items-center gap-2 text-gray-300">
 
                         <StarIcon className="w-5 h-5 text-primary fill-primary" />
                         {
                             show.vote_average.toFixed( 1 )
                         } User Rating
-                    </div>
-                    <p className="text-gray-400 mt-2 text-sm leading-tight max-w-xl">{ show.overview }</p>
-                    <p>{ timeInHours > 0
+                    </motion.div>
+                    <motion.p variants={ { hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } } } className="text-gray-400 mt-2 text-sm leading-tight max-w-xl">{ show.overview }</motion.p>
+                    <motion.p variants={ { hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } } }>{ timeInHours > 0
                         ? `${ timeInHours }h ${ timeInMinutes }m`
                         : `${ timeInMinutes }m` }{ "  " }  . { show.genres
                             .slice( 0, 2 )
                             .map( ( genre ) => genre.name )
-                            .join( " | " ) }{ " " }. { new Date( show.release_date ).getFullYear() }</p>
-                    <div className="flex items-center flex-wrap gap-4 mt-4">
-                        <button className="flex items-center gap-2 px-7 py-3 text-sm bg-gray-900 transition rounded-md font-medium cursor-pointer active:scale-95">
+                            .join( " | " ) }{ " " }. { new Date( show.release_date ).getFullYear() }</motion.p>
+                    <motion.div variants={ { hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } } } className="flex items-center flex-wrap gap-4 mt-4">
+                        <motion.button whileTap={ { scale: 0.96 } } className="flex items-center gap-2 px-7 py-3 text-sm bg-gray-900 transition rounded-md font-medium cursor-pointer">
                             <PlayCircleIcon className="w-5 h-5" />
                             Watch Trailer
-                        </button>
-                        <a href="#dateSelect" className="px-10 py-3 text-sm bg-primary hover:bg-primary transition rounded-md font-medium cursor-pointer active:scale-95">Buy Tickets</a>
-                        <button className="bg-gray-700 p-2.5 rounded-full transition cursor-pointer active:scale-95">
+                        </motion.button>
+                        <motion.a whileTap={ { scale: 0.96 } } href="#dateSelect" className="px-10 py-3 text-sm bg-primary hover:bg-primary transition rounded-md font-medium cursor-pointer">Buy Tickets</motion.a>
+                        <motion.button whileTap={ { scale: 0.9 } } className="bg-gray-700 p-2.5 rounded-full transition cursor-pointer">
                             <Heart className={ `w-5 h-5` } />
-                        </button>
-                    </div>
-                </div>
+                        </motion.button>
+                    </motion.div>
+                </motion.div>
 
 
 
@@ -87,10 +88,10 @@ export default function MovieDetails ()
                 <div className="flex items-center gap-4 w-max px-4">
                     {
                         show.casts.slice( 0, 11 ).map( ( cast ) => (
-                            <div key={ cast.name } className="flex flex-col items-center text-center">
+                            <motion.div key={ cast.name } initial={ { opacity: 0, y: 10 } } whileInView={ { opacity: 1, y: 0 } } viewport={ { once: true } } transition={ { duration: 0.25 } } className="flex flex-col items-center text-center">
                                 <img src={ cast.profile_path } alt={ cast.name } className="h-20 md:h-20 aspect-square object-cover rounded-full" />
                                 <p className="">{ cast.name }</p>
-                            </div>
+                            </motion.div>
                         ) )
                     }
                 </div>

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { dummyShowsData, type DummyShow } from "../../assets/assets";
 import AdminTitle from "../../components/admin/AdminTitle";
 import ListShowsSkeleton from "../../components/subComponents/ListShowsSkeleton";
+import { motion } from "motion/react";
 
 type setMovieType = {
   movie: DummyShow,
@@ -69,12 +70,12 @@ export default function ListShow ()
 
           <tbody>
             {shows.map( ( show, index ) => (
-              <tr key={index} className="border-b border-gray-200">
+              <motion.tr key={index} initial={ { opacity: 0, x: -8 } } animate={ { opacity: 1, x: 0 } } transition={ { delay: index * 0.06 } } className="border-b border-gray-200">
                 <td className="p-2 pl-5">{show.movie.title}</td>
                 <td className="p-2">{new Date( show.showDateTime ).toLocaleString()}</td>
                 <td className="p-2">{Object.keys( show.occupiedSeats ).length}</td>
                 <td className="p-2">{ currency }{Object.keys( show.occupiedSeats ).length * show.showPrice} </td>
-              </tr>
+              </motion.tr>
             ) )}
           </tbody>
 

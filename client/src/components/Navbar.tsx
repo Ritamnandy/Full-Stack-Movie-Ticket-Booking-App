@@ -8,6 +8,7 @@ import SignupModal from "./SignupModal";
 import EmailVerifyModal from "./EmailVerifyModal";
 import ForgotPasswordModal from "./ForgotPasswordModal";
 import ProfileMenu from "./ProfileMenu";
+import { AnimatePresence, motion } from "motion/react";
 
 const MenuLink = [
     { to: "/", label: "Home" },
@@ -87,7 +88,7 @@ export default function Navbar ()
                 <img src={ assets.logo } alt="App Logo" className="w-36 h-auto" />
             </Link>
             {/* menu items */ }
-            <div className={ `max-md:absolute max-md:top-0 max-md:left-0 max-md:font-medium max-md:text-lg z-50 flex flex-col md:flex-row items-center max-md:justify-center gap-8 md:px-8 py-3 max-md:h-screen  md:rounded-full backdrop-blur bg-black/70 md:bg-white/10 md:border border-gray-300/50 overflow-hidden transition-[width] duration-300 ${ isMenuOpen ? "max-md:w-full" : "max-md:w-0" }` } >
+            <div className="max-md:hidden md:flex md:flex-row items-center gap-8 md:px-8 py-3 md:rounded-full backdrop-blur md:bg-white/10 md:border md:border-gray-300/50">
                 <XIcon className="md:hidden absolute top-6 right-6 w-6 h-6 cursor-pointer" onClick={ () => setIsMenuOpen( false ) } />
 
                 {
@@ -101,6 +102,22 @@ export default function Navbar ()
                 }
 
             </div>
+            <AnimatePresence>
+                { isMenuOpen && (
+                    <motion.div
+                        initial={ { opacity: 0, clipPath: "circle(0% at calc(100% - 2rem) 2rem)" } }
+                        animate={ { opacity: 1, clipPath: "circle(150% at calc(100% - 2rem) 2rem)" } }
+                        exit={ { opacity: 0, clipPath: "circle(0% at calc(100% - 2rem) 2rem)" } }
+                        transition={ { duration: 0.35, ease: "easeInOut" } }
+                        className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-8 bg-black/90 text-lg font-medium backdrop-blur md:hidden"
+                    >
+                        <XIcon className="absolute top-6 right-6 w-6 h-6 cursor-pointer" onClick={ () => setIsMenuOpen( false ) } />
+                        { MenuLink.map( ( { to, label } ) => (
+                            <NavLink onClick={ () => { scrollTo( 0, 0 ); setIsMenuOpen( false ) } } to={ to } key={ to } className={ ( { isActive } ) => `transition-colors duration-200 ${ isActive ? "text-primary" : "hover:text-primary-dull" }` }>{ label }</NavLink>
+                        ) ) }
+                    </motion.div>
+                ) }
+            </AnimatePresence>
             {/* login button & search button */ }
             <div className="flex items-center gap-8">
                 <span
@@ -140,15 +157,19 @@ export default function Navbar ()
             </div>
             <MenuIcon className="cursor-pointer max-md:ml-4 md:hidden w-8 h-8  " onClick={ () => setIsMenuOpen( !isMenuOpen ) } />
 
-            {
-                isSearchOpen && (
-                    <div
+            <AnimatePresence>
+            { isSearchOpen && (
+                    <motion.div
                         ref={ searchBarRef }
+                        initial={ { opacity: 0, y: -10, scale: 0.98 } }
+                        animate={ { opacity: 1, y: 0, scale: 1 } }
+                        exit={ { opacity: 0, y: -10, scale: 0.98 } }
+                        transition={ { duration: 0.2, ease: "easeOut" } }
                         className="absolute top-20 right-52 md:right-30 w-88 rounded-full p-[1.5px]
                        bg-linear-to-r from-primary via-pink-500 to-primary
                        shadow-lg shadow-primary/20 transition-shadow duration-300
                        focus-within:shadow-primary/50 focus-within:shadow-2xl
-                       animate-in fade-in slide-in-from-top-2"
+                       "
                     >
                         <div className="flex items-center gap-3 h-12 px-4 rounded-full bg-slate-950/95 backdrop-blur-md">
                             {/* Search icon */ }
@@ -183,9 +204,9 @@ export default function Navbar ()
                                 Esc
                             </kbd>
                         </div>
-                    </div>
-                )
-            }
+                    </motion.div>
+            ) }
+            </AnimatePresence>
 
             <LoginModal
                 isOpen={ authModal === "login" }
