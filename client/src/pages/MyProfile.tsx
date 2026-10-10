@@ -32,7 +32,7 @@ type MyProfileProps = {
     hasPassword?: boolean; // false for Google-only accounts
     bookingsCount?: number;
     favoritesCount?: number;
-    onSaveProfile?: ( data: { name: string;  avatarFile: File | null } ) => Promise<void> | void;
+    onSaveProfile?: ( data: { name?: string; avatarFile: File | null } ) => Promise<void> | void;
     onChangePassword?: ( data: { currentPassword: string; newPassword: string } ) => Promise<void> | void;
     onDeleteAccount?: () => Promise<void> | void;
 };

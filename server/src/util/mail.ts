@@ -1,8 +1,8 @@
 
 import Nodemailer from "nodemailer"
 import { logger } from "./logger"
-import type { ChangedPasswordConfirmation, ResetPassword, VerifyEmail, WellcomeMail } from "../types/email.types";
-import { passwordChangedTemplate, resetPasswordTemplate, verifyEmailTemplate, welcomeTemplate } from "./mail.templates.js";
+import type { ChangedPasswordConfirmation, ResetPassword, VerifyEmail, WellcomeMail } from "../types/email.types"
+import { passwordChangedTemplate, resetPasswordTemplate, verifyEmailTemplate, welcomeTemplate } from "./mail.templates"
 
 const transporter = Nodemailer.createTransport( {
     service: "gmail",

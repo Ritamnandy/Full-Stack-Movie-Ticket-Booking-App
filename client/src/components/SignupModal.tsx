@@ -110,9 +110,8 @@ export default function SignupModal ( {
     const handleGoogle = () =>
     {
         console.log( 'Google signup function called' );
-        
-        // // Adjust to your backend's Google auth route
-        // window.location.href = `${ import.meta.env.VITE_API_URL }/auth/google`;
+
+        window.location.href = `${ import.meta.env.VITE_GOOGLE_AUTH_URL }`;
     };
 
     const inputClass = ( hasError: boolean ) =>

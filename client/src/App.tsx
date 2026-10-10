@@ -1,4 +1,4 @@
-import { Route, Routes, useLocation } from "react-router-dom"
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom"
 import { AnimatePresence, MotionConfig, motion } from "motion/react"
 import Navbar from "./components/Navbar"
 import Home from "./pages/Home"
@@ -20,22 +20,18 @@ import MyProfile from "./pages/MyProfile"
 import GoogleSuccess from "./pages/GoogleSuccess"
 import GoogleError from "./pages/GoogleError"
 import NotFound from "./pages/NotFound"
+import AdminRoute from "./components/admin/AdminRoute"
+import { useAuth } from "./hooks/useAuth"
 
 
 
 export default function App ()
 {
-
+const nevigate=useNavigate()
   const location = useLocation()
+  const { user, isAdmin, setProfileData, setProfileImage,deleteUserPermanently } = useAuth()
   const isAdminRoutes = location.pathname.startsWith( "/admin" );
-  const user = {
-    fullName: "John Doe",
-    username: "johndoe",
-    email: "johndoe@example.com",
-    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTU8TFJ7iUwyhF0_LOmPpst5aFLBQUYvRcuREn63JTVvg&s=10",
-    role: "user"
 
-  }
 
 
   return (
@@ -65,41 +61,49 @@ export default function App ()
               element={
                 <MyProfile
                   user={ {
-                    name: user.fullName,
-                    email: user.email,
-                    avatar: user.imageUrl,
-                    isAdmin: user.role === "admin",
+                    name: user?.name ?? "",
+                    email: user?.email ?? "",
+                    avatar: user?.avatar ?? "",
+                    isAdmin: isAdmin,
                   } }
                   hasPassword={ false }
                   bookingsCount={ 2 }
                   favoritesCount={ 5 }
                   onSaveProfile={ async ( { name, avatarFile } ) =>
                   {
-                    // const form = new FormData();
-                    // form.append("name", name); form.append("phone", phone);
-                    // if (avatarFile) form.append("avatar", avatarFile);
-                    // await api.put("/user/profile", form);
+                    if ( name )
+                    {
+                      await setProfileData( {
+                        name
+                      } )
+                      return
+                    }
+                    if ( avatarFile )
+                    {
+                      await setProfileImage( avatarFile )
+                      return
+                    }
                   } }
                   onChangePassword={ async ( { currentPassword, newPassword } ) =>
                   {
-                    // await api.put("/user/password", { currentPassword, newPassword });
-                    // throw new Error("Current password is incorrect") on failure
+                    console.log( currentPassword, newPassword );
+
                   } }
                   onDeleteAccount={ async () =>
                   {
-                    // await api.delete("/user");
-                    // clear auth state, then navigate("/")
+                    await deleteUserPermanently()
+                    nevigate('/')
                   } }
                 />
               }
             />
-            <Route path="/admin/*" element={ <LayOut /> } >
-            
-              <Route index element={ <DashBoard /> } />
-              <Route path="add-shows" element={ <AddShow /> } />
-              <Route path="list-shows" element={ <ListShow /> } />
-              <Route path="list-bookings" element={ <ListBooking /> } />
-
+            <Route element={ <AdminRoute /> }>
+              <Route path="/admin" element={ <LayOut /> }>
+                <Route index element={ <DashBoard /> } />
+                <Route path="add-shows" element={ <AddShow /> } />
+                <Route path="list-shows" element={ <ListShow /> } />
+                <Route path="list-bookings" element={ <ListBooking /> } />
+              </Route>
             </Route>
             {/* Keep this LAST: any other URL */ }
             <Route path="*" element={ <NotFound /> } />

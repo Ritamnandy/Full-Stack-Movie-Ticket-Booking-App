@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Check } from "lucide-react";
 import BlurCircle from "../components/BlurCircle";
+import { useAuth } from "../hooks/useAuth";
 
 const REDIRECT_MS = 1800;
 
@@ -9,11 +10,20 @@ export default function GoogleSuccess ()
 {
     const navigate = useNavigate();
 
+    const { refreshUser } = useAuth();
+
     useEffect( () =>
     {
-        const timer = setTimeout( () => navigate( "/", { replace: true } ), REDIRECT_MS );
+        let timer: ReturnType<typeof setTimeout>;
+        refreshUser().then( ( u ) =>
+        {
+            timer = setTimeout(
+                () => navigate( u ? "/" : "/google/error", { replace: true } ),
+                REDIRECT_MS
+            );
+        } );
         return () => clearTimeout( timer );
-    }, [ navigate ] );
+    }, [ navigate, refreshUser ] );
 
     return (
         <div className="relative min-h-screen flex items-center justify-center px-4 pt-28 pb-16 overflow-hidden">

@@ -9,6 +9,7 @@ import EmailVerifyModal from "./EmailVerifyModal";
 import ForgotPasswordModal from "./ForgotPasswordModal";
 import ProfileMenu from "./ProfileMenu";
 import { AnimatePresence, motion } from "motion/react";
+import { useAuth } from "../hooks/useAuth";
 
 const MenuLink = [
     { to: "/", label: "Home" },
@@ -27,15 +28,9 @@ export default function Navbar ()
     const [ verifyEmail, setVerifyEmail ] = useState( "" );
     const searchInputRef = useRef<HTMLInputElement>( null );
     const searchBarRef = useRef<HTMLDivElement>( null );
-    const user = {
-        fullName: "John Doe",
-        username: "johndoe",
-        email: "johndoe@example.com",
-        imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTU8TFJ7iUwyhF0_LOmPpst5aFLBQUYvRcuREn63JTVvg&s=10",
-        role: "user"
 
-    }
-    // const { openSignIn } = useClerk()
+    const { signup, login, user, isAdmin, verifyUser, resendOtpCode, forgetPassword, logout } = useAuth();
+
     const navigate = useNavigate()
     const [ searchValue, setSearchValue ] = useState( "" );
 
@@ -141,14 +136,13 @@ export default function Navbar ()
                         <ProfileMenu
                             user={ {
                                 email: user.email,
-                                name: user.fullName,
-                                avatar: user.imageUrl,
-                                isAdmin: user.role === 'admin'
+                                name: user.name,
+                                avatar: user.avatar,
+                                isAdmin: isAdmin
                             } }
                             onLogout={ async () =>
                             {
-                                // await api.post("/auth/logout")
-                                // clear your auth state here
+                                await logout()
                                 navigate( "/" );
                             } }
                         />
@@ -158,7 +152,7 @@ export default function Navbar ()
             <MenuIcon className="cursor-pointer max-md:ml-4 md:hidden w-8 h-8  " onClick={ () => setIsMenuOpen( !isMenuOpen ) } />
 
             <AnimatePresence>
-            { isSearchOpen && (
+                { isSearchOpen && (
                     <motion.div
                         ref={ searchBarRef }
                         initial={ { opacity: 0, y: -10, scale: 0.98 } }
@@ -205,7 +199,7 @@ export default function Navbar ()
                             </kbd>
                         </div>
                     </motion.div>
-            ) }
+                ) }
             </AnimatePresence>
 
             <LoginModal
@@ -215,7 +209,7 @@ export default function Navbar ()
                 onForgotPassword={ () => setAuthModal( "forgot" ) }
                 onSubmit={ async ( data ) =>
                 {
-                    console.log( 'Login function called ', data );
+                    await login( data )
                 } }
             />
 
@@ -225,7 +219,8 @@ export default function Navbar ()
                 onSwitchToLogin={ () => setAuthModal( "login" ) }
                 onSubmit={ async ( { name, email, password } ) =>
                 {
-                    console.log( 'Signup function called ', { name, email, password } );
+                    await signup( { name, email, password } );
+
                     setVerifyEmail( email );
                     setAuthModal( 'verify' );
 
@@ -239,17 +234,16 @@ export default function Navbar ()
                 onChangeEmail={ () => setAuthModal( "signup" ) }
                 onVerify={ async ( code ) =>
                 {
-                    setTimeout( () =>
-                    {
-                        console.log( code );
-                        console.log( verifyEmail );
-
-                        // setAuthModal( null );
-                    }, 2000 );
+                    await verifyUser( {
+                        email: verifyEmail,
+                        otp: code
+                    } )
                 } }
                 onResend={ async () =>
                 {
-                    // await api.post("/auth/resend-code", { email: verifyEmail })
+                    await resendOtpCode( {
+                        email: verifyEmail
+                    } )
                 } }
             />
 
@@ -259,12 +253,16 @@ export default function Navbar ()
                 onBackToLogin={ () => setAuthModal( "login" ) }
                 onSubmit={ async ( email ) =>
                 {
-                    console.log( 'Forgot password submitted with email:', email );
+                    await forgetPassword( {
+                        email: email
+                    } )
 
                 } }
                 onResend={ async ( email ) =>
                 {
-                    console.log( 'Resend code requested for email:', email );
+                    await forgetPassword( {
+                        email: email
+                    } )
                 } }
             />
 

@@ -68,7 +68,7 @@ authRouter.route( "/logout" )
     .post( verifyJwt, logoutController );
 
 authRouter.route( "/profile" )
-    .post( verifyJwt, getUserController )
+    .get( verifyJwt, getUserController )
     .patch( verifyJwt, validate( valivationScheme.updateProfile ), upDateUserProfileData );
 
 

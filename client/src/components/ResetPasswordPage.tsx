@@ -3,6 +3,7 @@ import { useForm, type SubmitHandler } from "react-hook-form";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowRight, Check, Eye, EyeOff, Link2Off, Loader2, Lock, ShieldCheck } from "lucide-react";
 import BlurCircle from "../components/BlurCircle";
+import { useAuth } from "../hooks/useAuth";
 
 type FormValues = {
     password: string;
@@ -28,7 +29,7 @@ export default function ResetPassword ()
     const [ searchParams ] = useSearchParams();
     const navigate = useNavigate();
     const token = searchParams.get( "token" );
-
+    const { resetPassword } = useAuth()
     const [ showPassword, setShowPassword ] = useState( false );
     const [ done, setDone ] = useState( false );
     const redirectTimer = useRef<ReturnType<typeof setTimeout> | null>( null );
@@ -63,9 +64,10 @@ export default function ResetPassword ()
     {
         try
         {
-            // TODO: call your API, e.g.
-            // await api.post("/auth/reset-password", { token, password })
-            console.log( { token, password } );
+            await resetPassword( {
+                password,
+                token: token ?? ""
+            } )
 
             setDone( true );
             redirectTimer.current = setTimeout( goToLogin, 3000 );

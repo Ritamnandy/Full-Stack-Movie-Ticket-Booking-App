@@ -82,7 +82,7 @@ function LoginForm ( {
 
     const handleGoogle = () =>
     {
-        window.location.href = `${ import.meta.env.VITE_API_URL }/auth/google`;
+        window.location.href = `${ import.meta.env.VITE_GOOGLE_AUTH_URL }`;
     };
 
     const inputClass = ( hasError: boolean ) =>
