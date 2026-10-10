@@ -20,7 +20,7 @@ function setAuthCookies (
         httpOnly: true,
         secure: isProd, // must be true in prod (HTTPS); false locally over http
         sameSite: 'strict',
-        maxAge: 5 * 60 * 60 * 1000, // 1 hour — match access token expiry
+        maxAge: 10 * 60 * 1000, // 10 minutes — match access token expiry
         path: '/',
     } );
 
@@ -29,7 +29,7 @@ function setAuthCookies (
         secure: isProd,
         sameSite: 'strict',
         maxAge: 10 * 24 * 60 * 60 * 1000, // 10 days — match refresh token expiry
-        path: '/auth/refresh-access-token', // scope it — only sent on the refresh endpoint, reduces exposure
+        path: '/auth/refreshtoken', // scope it — only sent on the refresh endpoint, reduces exposure
     } );
 }
 
@@ -75,6 +75,8 @@ const logoutController = asyncHandler( async ( req: Request, res: Response ) =>
         return res.status( 401 ).json( ApiError.unauthorized( "Unauthorized request", [ "User not found" ] ) );
     }
     await authServices.logOutUser( user._id.toString() );
+    res.clearCookie( 'accessToken' )
+    res.clearCookie( 'refreshToken' )
     return res.status( 200 ).json( ApiResponse.ok( "Logout successful", "user logged out successfully" ) );
 } )
 
@@ -121,6 +123,8 @@ const deleteUserPermanently = asyncHandler( async ( req: Request, res: Response 
         return res.status( 401 ).json( ApiError.unauthorized( "Unauthorized request", [ "User not found" ] ) );
     }
     const response = await authServices.deleteUserPermanently( user._id.toString() );
+    res.clearCookie( 'accessToken' )
+    res.clearCookie( 'refreshToken' )
     return res.status( 200 ).json( ApiResponse.ok( response.message, {} ) );
 } )
 
@@ -143,19 +147,19 @@ const googleLogin = asyncHandler( async ( req: Request, res: Response ) =>
     const user = req.user as GoogleOauthBody
     if ( !user )
     {
-        return res.status( 401 ).json( ApiError.unauthorized( "Unauthorized request", [ "User not found" ] ) );
-        // return res.redirect( process.env.ERROR_URL as string );
+        // return res.status( 401 ).json( ApiError.unauthorized( "Unauthorized request", [ "User not found" ] ) );
+        return res.redirect( process.env.ERROR_URL as string );
     }
     const response = await authServices.googleLogin( user );
     if ( response.success )
     {
         setAuthCookies( res, response.accessToken, response.refreshToken )
-        return res.status( 200 ).json( ApiResponse.ok( response.message, response ) );
-        // return res.redirect( process.env.SUCCESS_URL as string );
+        // return res.status( 200 ).json( ApiResponse.ok( response.message, response ) );
+        return res.redirect( process.env.SUCCESS_URL as string );
     }
 
-    return res.status( 400 ).json( ApiError.badRequest( response.message, [] ) );
-    // return res.redirect( process.env.ERROR_URL as string );
+    // return res.status( 400 ).json( ApiError.badRequest( response.message, [] ) );
+    return res.redirect( process.env.ERROR_URL as string );
 
 
 } )
@@ -163,6 +167,13 @@ const googleLogin = asyncHandler( async ( req: Request, res: Response ) =>
 const profileImageController = asyncHandler( async ( req: Request, res: Response ) =>
 {
     const user = req.user as UserDocument
+    const file = req.file
+    const isGo = true
+    console.log( "profile image", file );
+    if ( isGo )
+    {
+        return res.status( 400 ).json( ApiError.badRequest( "No file uploaded", [] ) );
+    }
     if ( !user )
     {
         return res.status( 401 ).json( ApiError.unauthorized( "Unauthorized request", [ "User not found" ] ) );

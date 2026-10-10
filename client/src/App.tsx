@@ -27,17 +27,18 @@ import { useAuth } from "./hooks/useAuth"
 
 export default function App ()
 {
-const nevigate=useNavigate()
+  const nevigate = useNavigate()
   const location = useLocation()
-  const { user, isAdmin, setProfileData, setProfileImage,deleteUserPermanently } = useAuth()
-  const isAdminRoutes = location.pathname.startsWith( "/admin" );
-
+  const { user, isAdmin, setProfileData, setProfileImage, deleteUserPermanently } = useAuth()
+  const hideLayout =
+    location.pathname.startsWith( "/admin" ) ||
+    location.pathname.startsWith( "/reset-password" )
 
 
   return (
     <MotionConfig reducedMotion="user">
       <Toaster />
-      { !isAdminRoutes && <Navbar /> }
+      { !hideLayout && <Navbar /> }
       <AnimatePresence mode="wait">
         <motion.main
           key={ location.pathname }
@@ -69,20 +70,13 @@ const nevigate=useNavigate()
                   hasPassword={ false }
                   bookingsCount={ 2 }
                   favoritesCount={ 5 }
-                  onSaveProfile={ async ( { name, avatarFile } ) =>
+                  onSaveProfile={ async ( { name } ) =>
                   {
-                    if ( name )
-                    {
-                      await setProfileData( {
-                        name
-                      } )
-                      return
-                    }
-                    if ( avatarFile )
-                    {
-                      await setProfileImage( avatarFile )
-                      return
-                    }
+                    await setProfileData( { name } )
+                  } }
+                  onSaveAvatar={ async ( file ) =>
+                  {
+                    await setProfileImage( file )
                   } }
                   onChangePassword={ async ( { currentPassword, newPassword } ) =>
                   {
@@ -92,7 +86,8 @@ const nevigate=useNavigate()
                   onDeleteAccount={ async () =>
                   {
                     await deleteUserPermanently()
-                    nevigate('/')
+                    nevigate( '/' )
+                    scrollTo( 0, 0 )
                   } }
                 />
               }
@@ -110,7 +105,7 @@ const nevigate=useNavigate()
           </Routes>
         </motion.main>
       </AnimatePresence>
-      { !isAdminRoutes && <Footer /> }
+      { !hideLayout && <Footer /> }
 
       <CustomCursor />
     </MotionConfig>

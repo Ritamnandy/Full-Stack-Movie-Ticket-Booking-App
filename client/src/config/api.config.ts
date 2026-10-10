@@ -1,5 +1,4 @@
 import axios, { AxiosError, type AxiosRequestConfig } from "axios";
-import toast from "react-hot-toast";
 
 const BASE_URL = import.meta.env.VITE_API_URL as string;
 
@@ -20,7 +19,7 @@ const client = axios.create( {
 } );
 
 // Paths that must never trigger a refresh attempt
-const NO_REFRESH_PATHS = [ "/auth/refresh", "/auth/login" ];
+const NO_REFRESH_PATHS = [ "/auth/refreshtoken", "/auth/login" ];
 
 // Share one refresh call if several requests hit 401 at the same time
 let refreshPromise: Promise<unknown> | null = null;
@@ -44,7 +43,7 @@ client.interceptors.response.use(
             try
             {
                 refreshPromise ??= client
-                    .post( "/auth/refresh" )
+                    .post( "/auth/refreshtoken" )
                     .finally( () => ( refreshPromise = null ) );
                 await refreshPromise;
                 return client( original ); // retry once
@@ -80,10 +79,13 @@ export async function api<T = unknown> (
             data: body,
             ...config,
         } );
-        if ( successMessage ) toast.success( successMessage );
+        if ( successMessage ) console.log( successMessage );
+        ;
         return res.data;
     } catch ( err )
     {
+        console.log( silent );
+        
         // Aborted requests (AbortController) are not errors worth showing
         if ( axios.isCancel( err ) ) throw err;
 
@@ -97,7 +99,7 @@ export async function api<T = unknown> (
                 : "Network error. Please check your connection.";
 
             // `id` dedupes identical toasts fired by parallel requests
-            if ( !silent ) toast.error( message, { id: message } );
+
 
             throw new ApiError( message, err.response?.status ?? 0 );
         }

@@ -12,7 +12,7 @@ type LoginModalProps = {
     onClose: () => void;
     onSwitchToSignup: () => void;
     onSubmit?: (
-        data: { name: string; email: string; password: string }
+        data: { email: string; password: string }
     ) => Promise<void> | void;
     onForgotPassword?: () => void;
 };
@@ -37,6 +37,7 @@ function LoginForm ( {
     onClose,
     onSwitchToSignup,
     onForgotPassword,
+    onSubmit
 }: Omit<LoginModalProps, "isOpen"> )
 {
     const [ showPassword, setShowPassword ] = useState( false );
@@ -70,7 +71,10 @@ function LoginForm ( {
         try
         {
             // TODO: call your login API here
-            await submit?.( data );
+            await onSubmit?.( {
+                email: data.email ?? "",
+                password: data.password ?? "",
+            } );
             onClose();
         } catch ( err )
         {

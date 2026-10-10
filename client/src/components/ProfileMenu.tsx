@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown, Heart, LayoutDashboard, LogOut, TicketPlus, UserRound } from "lucide-react";
 
+
 export type AppUser = {
     name: string;
     email: string;
@@ -15,16 +16,21 @@ type ProfileMenuProps = {
 };
 
 const getInitials = ( name: string ) =>
-    name
+{
+    return name
         .trim()
         .split( /\s+/ )
         .slice( 0, 2 )
         .map( ( part ) => part[ 0 ]?.toUpperCase() ?? "" )
         .join( "" ) || "U";
+}
+
+
 
 function Avatar ( { user, size }: { user: AppUser; size: string } )
 {
     const [ broken, setBroken ] = useState( false );
+
 
     if ( user.avatar && !broken )
     {
@@ -154,10 +160,10 @@ export default function ProfileMenu ( { user, onLogout }: ProfileMenuProps )
                             <UserRound className="w-4 h-4" />
                             My Profile
                         </button>
-                        {!user.isAdmin && (<button role="menuitem" onClick={ () => go( "/my-bookings" ) } className={ itemClass }>
+                        { !user.isAdmin && ( <button role="menuitem" onClick={ () => go( "/my-bookings" ) } className={ itemClass }>
                             <TicketPlus className="w-4 h-4" />
                             My Bookings
-                        </button>)}
+                        </button> ) }
                         { !user.isAdmin && ( <button role="menuitem" onClick={ () => go( "/favorite" ) } className={ itemClass }>
                             <Heart className="w-4 h-4" />
                             Favorites

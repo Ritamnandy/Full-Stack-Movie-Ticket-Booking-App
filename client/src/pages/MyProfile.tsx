@@ -2,27 +2,26 @@ import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { Link } from "react-router-dom";
 import
-    {
-        Camera,
-        Check,
-        Eye,
-        EyeOff,
-        Heart,
-        Loader2,
-        Lock,
-        Mail,
-        Shield,
-        TicketPlus,
-        Trash2,
-        User,
-        UserRound,
-    } from "lucide-react";
+{
+    Camera,
+    Check,
+    Eye,
+    EyeOff,
+    Heart,
+    Loader2,
+    Lock,
+    Mail,
+    Shield,
+    TicketPlus,
+    Trash2,
+    User,
+    UserRound,
+} from "lucide-react";
 import BlurCircle from "../components/BlurCircle";
 
 export type ProfileUser = {
     name: string;
     email: string;
-    phone?: string;
     avatar?: string | null;
     isAdmin?: boolean;
 };
@@ -32,7 +31,8 @@ type MyProfileProps = {
     hasPassword?: boolean; // false for Google-only accounts
     bookingsCount?: number;
     favoritesCount?: number;
-    onSaveProfile?: ( data: { name?: string; avatarFile: File | null } ) => Promise<void> | void;
+    onSaveProfile?: ( data: { name: string } ) => Promise<void> | void;
+    onSaveAvatar?: ( file: File ) => Promise<void> | void;
     onChangePassword?: ( data: { currentPassword: string; newPassword: string } ) => Promise<void> | void;
     onDeleteAccount?: () => Promise<void> | void;
 };
@@ -71,6 +71,7 @@ export default function MyProfile ( {
     bookingsCount,
     favoritesCount,
     onSaveProfile,
+    onSaveAvatar,
     onChangePassword,
     onDeleteAccount,
 }: MyProfileProps )
@@ -83,6 +84,7 @@ export default function MyProfile ( {
     const [ avatarPreview, setAvatarPreview ] = useState<string | null>( null );
     const [ avatarFile, setAvatarFile ] = useState<File | null>( null );
     const [ avatarError, setAvatarError ] = useState( "" );
+    const [ avatarSaving, setAvatarSaving ] = useState( false );
     const [ imgBroken, setImgBroken ] = useState( false );
 
     // Feedback
@@ -98,7 +100,7 @@ export default function MyProfile ( {
 
     // Profile form
     const profileForm = useForm<ProfileValues>( {
-        defaultValues: { name: user.name, },
+        defaultValues: { name: user.name },
         mode: "onTouched",
     } );
 
@@ -158,13 +160,34 @@ export default function MyProfile ( {
         setAvatarError( "" );
     };
 
+    // Saves only the photo
+    const saveAvatar = async () =>
+    {
+        if ( !avatarFile ) return;
+        try
+        {
+            setAvatarSaving( true );
+            setAvatarError( "" );
+            await onSaveAvatar?.( avatarFile );
+            removeAvatarChange(); // clears the preview, the saved photo takes over
+            setImgBroken( false );
+            flashSaved( "Profile photo updated successfully." );
+        } catch ( err )
+        {
+            setAvatarError( err instanceof Error ? err.message : "Could not upload your photo. Try again." );
+        } finally
+        {
+            setAvatarSaving( false );
+        }
+    };
+
+    // Saves only the name
     const saveProfile: SubmitHandler<ProfileValues> = async ( { name } ) =>
     {
         try
         {
-            await onSaveProfile?.( { name: name.trim(), avatarFile } );
+            await onSaveProfile?.( { name: name.trim() } );
             profileForm.reset( { name: name.trim() } );
-            setAvatarFile( null );
             flashSaved( "Profile updated successfully." );
         } catch ( err )
         {
@@ -206,7 +229,7 @@ export default function MyProfile ( {
     const { errors: sErrors, isSubmitting: sSubmitting } = passwordForm.formState;
 
     const shownAvatar = avatarPreview ?? ( !imgBroken ? user.avatar : null );
-    const canSaveProfile = pDirty || !!avatarFile;
+    const canSaveProfile = pDirty;
 
     const tabClass = ( active: boolean ) =>
         `flex items-center gap-2 px-5 h-10 rounded-full text-sm font-medium transition cursor-pointer ${ active ? "bg-primary text-white shadow-lg shadow-primary/30" : "text-gray-400 hover:text-white"
@@ -229,7 +252,7 @@ export default function MyProfile ( {
                         {/* Avatar with upload */ }
                         <div className="relative shrink-0">
                             <div className="rounded-full p-1 bg-linear-to-br from-primary to-pink-500">
-                                <div className="rounded-full bg-slate-950 p-1">
+                                <div className="relative rounded-full bg-slate-950 p-1">
                                     { shownAvatar ? (
                                         <img
                                             src={ shownAvatar }
@@ -243,14 +266,37 @@ export default function MyProfile ( {
                                             { getInitials( user.name ) }
                                         </div>
                                     ) }
+
+                                    {/* Save / cancel, shown only after choosing a new photo */ }
+                                    { avatarFile && (
+                                        <div className="animate-backdrop-in absolute inset-1 flex flex-col items-center justify-center gap-1.5 rounded-full bg-black/60 backdrop-blur-[2px]">
+                                            <button
+                                                type="button"
+                                                onClick={ saveAvatar }
+                                                disabled={ avatarSaving }
+                                                className="flex h-7 min-w-16 items-center justify-center rounded-full bg-linear-to-r from-primary to-pink-500 px-3 text-xs font-semibold shadow-lg shadow-primary/30 hover:opacity-90 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed transition cursor-pointer"
+                                            >
+                                                { avatarSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Save" }
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={ removeAvatarChange }
+                                                disabled={ avatarSaving }
+                                                className="text-[11px] text-gray-200 hover:text-white disabled:opacity-60 transition cursor-pointer"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    ) }
                                 </div>
                             </div>
 
                             <button
                                 type="button"
                                 onClick={ () => fileInputRef.current?.click() }
+                                disabled={ avatarSaving }
                                 aria-label="Change profile photo"
-                                className="absolute bottom-0 right-0 flex h-9 w-9 items-center justify-center rounded-full border-2 border-slate-950 bg-primary text-white shadow-lg hover:bg-primary-dull active:scale-95 transition cursor-pointer"
+                                className="absolute bottom-0 right-0 flex h-9 w-9 items-center justify-center rounded-full border-2 border-slate-950 bg-primary text-white shadow-lg hover:bg-primary-dull active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed transition cursor-pointer"
                             >
                                 <Camera className="w-4 h-4" />
                             </button>
@@ -274,18 +320,6 @@ export default function MyProfile ( {
                             </div>
                             <p className="mt-0.5 truncate text-sm text-gray-400">{ user.email }</p>
 
-                            { avatarFile && (
-                                <p className="mt-2 text-xs text-gray-400">
-                                    New photo selected.{ " " }
-                                    <button
-                                        type="button"
-                                        onClick={ removeAvatarChange }
-                                        className="text-primary hover:underline cursor-pointer"
-                                    >
-                                        Undo
-                                    </button>
-                                </p>
-                            ) }
                             { avatarError && (
                                 <p role="alert" className="mt-2 text-xs text-red-400">
                                     { avatarError }
@@ -355,7 +389,7 @@ export default function MyProfile ( {
                         className="animate-card-in mt-4 rounded-3xl border border-white/10 bg-slate-950/80 p-6 sm:p-8"
                     >
                         <h3 className="text-base font-semibold">Personal information</h3>
-                        <p className="mt-1 text-sm text-gray-400">Update your name and contact details.</p>
+                        <p className="mt-1 text-sm text-gray-400">Update your name.</p>
 
                         <div className="mt-6 flex flex-col gap-4">
                             <div>
@@ -390,17 +424,17 @@ export default function MyProfile ( {
                                 <p className="mt-1.5 pl-4 text-xs text-gray-500">Your email can't be changed here.</p>
                             </div>
 
-                            
+                            { pErrors.root?.serverError && (
+                                <p role="alert" className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-xs text-red-300">
+                                    { pErrors.root.serverError.message }
+                                </p>
+                            ) }
 
                             <div className="flex flex-wrap justify-end gap-3 pt-2">
                                 <button
                                     type="button"
                                     disabled={ !canSaveProfile || pSubmitting }
-                                    onClick={ () =>
-                                    {
-                                        profileForm.reset();
-                                        removeAvatarChange();
-                                    } }
+                                    onClick={ () => profileForm.reset() }
                                     className="px-6 h-11 rounded-full border border-white/15 text-sm font-medium hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer"
                                 >
                                     Cancel

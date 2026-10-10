@@ -5,6 +5,7 @@ import { ArrowRight, Check, Eye, EyeOff, Link2Off, Loader2, Lock, ShieldCheck } 
 import BlurCircle from "../components/BlurCircle";
 import { useAuth } from "../hooks/useAuth";
 
+
 type FormValues = {
     password: string;
     confirmPassword: string;
@@ -29,6 +30,8 @@ export default function ResetPassword ()
     const [ searchParams ] = useSearchParams();
     const navigate = useNavigate();
     const token = searchParams.get( "token" );
+    console.log(token);
+    
     const { resetPassword } = useAuth()
     const [ showPassword, setShowPassword ] = useState( false );
     const [ done, setDone ] = useState( false );

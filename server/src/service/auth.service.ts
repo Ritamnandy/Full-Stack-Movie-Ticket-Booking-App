@@ -415,9 +415,10 @@ class AuthService
 
     async setUserImage ( file: Express.Multer.File, userId: string )
     {
-        const totalStart = performance.now();
+        // const totalStart = performance.now();
 
-        console.log( 'File received:', file.size );
+        // console.log( 'File received:', file.size );
+        // console.log( file );
 
 
         const imageResult = await uploadImage( file.buffer, file.originalname );
@@ -425,6 +426,7 @@ class AuthService
         {
             throw ApiError.badRequest( 'Failed to upload image, please try again later' );
         }
+
 
         const response = await this.authRepository.setUserProfileImage( userId, imageResult.url )
 

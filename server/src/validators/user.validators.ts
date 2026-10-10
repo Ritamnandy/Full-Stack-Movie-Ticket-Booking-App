@@ -68,8 +68,7 @@ const forgetPasswordSchema = z.object( {
 const resetpasswordSchema = z.object( {
     token: z
         .string()
-        .trim()
-        .max( 6, { message: "Token must be at most 6 characters long" } ),
+        .trim(),
     password: z
         .string()
         .trim()

@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { AuthContext, type AuthContextValue, type AuthUser } from "./authcontext";
-import {  apiRequest } from "../api/apiRequest";
+import { apiRequest } from "../api/apiRequest";
 import { ApiError } from "../api/apiError";
 import { api } from "../config/api.config";
 
 // Map your backend user (profileImage, ...) to the shape the UI uses
 type ApiUser = {
-    _id?: string;
     id?: string;
     name: string;
     email: string;
@@ -17,7 +16,7 @@ type ApiUser = {
 };
 
 const toAuthUser = ( u: ApiUser ): AuthUser => ( {
-    id: u.id ?? u._id ?? "",
+    id: u.id ?? "",
     name: u.name,
     email: u.email,
     role: u.role,
@@ -34,9 +33,22 @@ export default function AuthProvider ( { children }: { children: ReactNode } )
     {
         try
         {
-            const data = await api<ApiUser | { user: ApiUser }>( "/auth/profile", { method: "GET", successMessage: "Profile fetched successfully" } );
-            const raw = "user" in data ? data.user : data;
-            const next = toAuthUser( raw );
+            const localdata = sessionStorage.getItem( 'profiledata' );
+            if ( localdata )
+            {
+                const parsed = JSON.parse( localdata );
+                const next = toAuthUser( parsed as ApiUser );
+                setUser( next );
+                console.log( "profile get from session storage" );
+
+                return next;
+            }
+            const { data } = await api<ApiUser | { data: ApiUser }>( "/auth/profile", { method: "GET", successMessage: "Profile fetched successfully" } );
+            // console.log( data );
+
+            const raw = data ? data : null;
+            sessionStorage.setItem( 'profiledata', JSON.stringify( raw ) )
+            const next = toAuthUser( raw as ApiUser );
             setUser( next );
             return next;
         } catch ( err )
@@ -66,7 +78,9 @@ export default function AuthProvider ( { children }: { children: ReactNode } )
     const login: AuthContextValue[ "login" ] = useCallback(
         async ( data ) =>
         {
-            await api( "/auth/login", { method: "POST", body: data } );
+            const response = await api( "/auth/login", { method: "POST", body: data } );
+            console.log( "login response", response );
+
             await refreshUser(); // read the user from the cookie session
         },
         [ refreshUser ]
@@ -75,7 +89,7 @@ export default function AuthProvider ( { children }: { children: ReactNode } )
     const signup: AuthContextValue[ "signup" ] = useCallback( async ( data ) =>
     {
         // Don't log in yet: the user must verify their email first
-        await api( "/auth/signup", { method: "POST", body: data } );
+        await api( "/auth/register", { method: "POST", body: data } );
     }, [] );
 
     const logout = useCallback( async () =>
@@ -83,6 +97,7 @@ export default function AuthProvider ( { children }: { children: ReactNode } )
         try
         {
             await api( "/auth/logout", { method: "POST" } );
+            sessionStorage.removeItem( 'profiledata' );
         } finally
         {
             setUser( null );
@@ -119,6 +134,7 @@ export default function AuthProvider ( { children }: { children: ReactNode } )
         async ( data ) =>
         {
             await apiRequest.setProfileData( data );
+            sessionStorage.removeItem( 'profiledata' );
             await refreshUser(); // navbar and profile pick up the new name
         },
         [ refreshUser ]
@@ -129,7 +145,10 @@ export default function AuthProvider ( { children }: { children: ReactNode } )
         {
             const formData = new FormData();
             formData.append( "avatar", file ); // must match your FileInterceptor field name
-            await apiRequest.setProfileImage( formData );
+            const response = await apiRequest.setProfileImage( formData );
+            console.log( response );
+
+            sessionStorage.removeItem( 'profiledata' );
             await refreshUser(); // navbar picks up the new photo
         },
         [ refreshUser ]
@@ -138,6 +157,7 @@ export default function AuthProvider ( { children }: { children: ReactNode } )
     const deleteUserPermanently: AuthContextValue[ "deleteUserPermanently" ] = useCallback( async () =>
     {
         await apiRequest.deleteUserPermanently();
+        sessionStorage.removeItem( 'profiledata' );
         setUser( null );
     }, [] );
 
