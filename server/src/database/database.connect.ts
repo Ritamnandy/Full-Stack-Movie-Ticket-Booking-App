@@ -26,3 +26,8 @@ export const connectDb = async () =>
         throw error instanceof Error ? error.message : new Error( "Something went wrong during database connection" );
     }
 }
+
+export const disconnectDb = async () =>
+{
+    await mongoose.connection.close();
+};
