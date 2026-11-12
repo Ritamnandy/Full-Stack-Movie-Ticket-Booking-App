@@ -168,9 +168,7 @@ const profileImageController = asyncHandler( async ( req: Request, res: Response
 {
     const user = req.user as UserDocument
     const file = req.file
-    const isGo = true
-    console.log( "profile image", file );
-    if ( isGo )
+    if ( !file )
     {
         return res.status( 400 ).json( ApiError.badRequest( "No file uploaded", [] ) );
     }

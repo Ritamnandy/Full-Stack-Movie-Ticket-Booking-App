@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import { assets, dummyDateTimeData, dummyShowsData, type DummyShow, type Show, type ShowsByDate } from "../assets/assets"
+import { assets, dummyDateTimeData, type DummyShow, type Show, type ShowsByDate } from "../assets/assets"
 import { ArrowRightIcon, ClockIcon } from "lucide-react"
 import { isoTimeFormat } from "../lib/isoTimeFormat"
 import BlurCircle from "../components/BlurCircle"
 import toast from "react-hot-toast"
 import { motion } from "motion/react"
+import { api } from "../config/api.config"
 
 type ShowType = {
     show: DummyShow,
@@ -17,9 +18,7 @@ type SelectSeat = string
 export default function SeatLayout ()
 {
 
-
     const groupRows = [ [ 'A', 'B' ], [ 'C', 'D' ], [ 'E', 'F' ], [ 'G', 'H' ], [ 'I', 'J' ] ]
-
 
     const { id, date } = useParams()
     const navigate = useNavigate()
@@ -29,20 +28,27 @@ export default function SeatLayout ()
 
     const getShow = useCallback( async () =>
     {
-        const response = dummyShowsData.find( ( show ) => show._id === id )
-        if ( response )
+        try
         {
-            setShow( {
-                show: response,
-                dateTime: dummyDateTimeData
-            } )
+            const response = await api( "/shows/" + id )
+            const s = response.data
+            if ( s && s.movie )
+            {
+                setShow( {
+                    show: s.movie,
+                    dateTime: s.dateTime
+                } )
+            }
+        } catch ( err )
+        {
+            console.error( 'Error fetching show:', err )
         }
     }, [ id ] )
     const handleSeatClick = ( id: string ) =>
     {
         if ( !selectTime )
         {
-            toast.error( 'Please select  time first' )
+            toast.error( 'Please select time first' )
             return
         }
         if ( !selectedSeats.includes( id ) && selectedSeats.length > 4 )
@@ -75,11 +81,8 @@ export default function SeatLayout ()
 
     useEffect( () =>
     {
-        // The local mock data is loaded on route changes; production data will be async.
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        getShow();
+        getShow()
     }, [ getShow ] );
-
 
 
     return show ? (
@@ -96,8 +99,7 @@ export default function SeatLayout ()
                                 onClick={ () => setSelectTime( item ) }
 
                                 key={ item.showId }
-                                className={ `flex items-center gap-2 px-6 py-2 w-max rounded-r-md cursor-pointer transition ${ selectTime?.time === item.time ? 'bg-primary text-white' : 'hover:bg-primary/20'
-                                    }` }
+                                className={ `flex items-center gap-2 px-6 py-2 w-max rounded-r-md cursor-pointer transition ${ selectTime?.time === item.time ? 'bg-primary text-white' : 'hover:bg-primary/20' }` }
                             >
                                 <ClockIcon className="w-4 h-4" />
                                 <p className="text-sm">{
@@ -149,7 +151,7 @@ export default function SeatLayout ()
                             navigate( '/my-bookings' );
                         } else
                         {
-                            toast.error( 'Please select seat first' );
+                            toast.error( 'Please select seat first' )
                         }
                     } }
                     className="flex items-center gap-1 mt-20 px-10 py-3 text-sm bg-primary hover:bg-primary-dull transition rounded-full font-medium cursor-pointer active:scale-95">

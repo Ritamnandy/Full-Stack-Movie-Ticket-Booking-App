@@ -1,12 +1,9 @@
 import { useEffect, useState } from "react";
-import { dummyBookingData, type BookingType } from "../assets/assets";
-import BlurCircle from "../components/BlurCircle";
 import { formatMovieTime } from "../lib/movieTimeFormat";
 import { formatDate } from "../lib/dateFormat";
 import MyBookingSkeleton from "../components/subComponents/MyBookingSkeleton";
 import { motion } from "motion/react";
-
-
+import { api } from "../config/api.config";
 
 export default function MyBooking ()
 {
@@ -16,16 +13,35 @@ export default function MyBooking ()
 
     const fetchBookings = async () =>
     {
-        setBookings( dummyBookingData )
+        try
+        {
+            const data = await api( "/bookings/me" )
+            setBookings( data.data ?? [] )
+        } catch ( err )
+        {
+            console.error( 'Error fetching bookings:', err )
+        }
         setLoading( false )
     }
 
     useEffect( () =>
     {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchBookings()
     }, [] )
 
+    const BookingType = {
+        _id: string,
+        user: { name: string },
+        show: {
+            _id: string
+            movie: DummyShow
+            showDateTime: string
+            showPrice: number
+        }
+        amount: number
+        bookedSeats: string[]
+        isPaid: boolean
+    };
 
     return !loading ? (
         <div className="relative px-6 md:px-16 lg:px-40 pt-30 md:pt-40 min-h-[80vh]">
@@ -56,7 +72,6 @@ export default function MyBooking ()
                         </div>
 
 
-
                         <div className="flex flex-col md:items-end md:text-right justify-between p-4">
 
                             <div className="flex items-center gap-4">
@@ -85,4 +100,19 @@ export default function MyBooking ()
     ) : (
         <MyBookingSkeleton />
     )
+}
+
+import type { DummyShow } from "../../assets/assets";
+type BookingType = {
+    _id: string,
+    user: { name: string },
+    show: {
+        _id: string
+        movie: DummyShow
+        showDateTime: string
+        showPrice: number
+    }
+    amount: number
+    bookedSeats: string[]
+    isPaid: boolean
 }

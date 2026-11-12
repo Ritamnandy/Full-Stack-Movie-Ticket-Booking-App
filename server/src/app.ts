@@ -11,6 +11,7 @@ import { ApiError } from "./util/apiError";
 import { notFound } from "./middlewares/notfound.middlewares";
 import { errorHandler } from "./middlewares/error.middlewares";
 import authRoute from "./routes/auth.routes";
+import cinemaRoute from "./routes/cinema.routes";
 import "./job/worker.jobs"
 import "./oauth/google.oauth"
 
@@ -73,6 +74,7 @@ app.get( "/health", ( req, res ) =>
 
 
 app.use( "/api/v1/auth", authRoute )
+app.use( "/api/v1", cinemaRoute )
 
 
 app.use( notFound )

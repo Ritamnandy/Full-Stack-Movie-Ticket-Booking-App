@@ -26,7 +26,7 @@ const extractTokenFromHeader = ( request: AuthRequest ): string | undefined =>
     {
         return undefined
     }
-    const [ type, token ] = headerToken.split( '' )
+    const [ type, token ] = headerToken.split( ' ' )
     if ( type !== 'Bearer' )
     {
         return undefined;

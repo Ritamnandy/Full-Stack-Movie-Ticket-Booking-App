@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { dummyShowsData, type DummyShow } from "../assets/assets";
+import { api } from "../config/api.config";
 import BlurCircle from "../components/BlurCircle";
 import { Heart, PlayCircleIcon, StarIcon } from "lucide-react";
 import DateSelect from "../components/DateSelect";
@@ -8,35 +8,25 @@ import MovieCard from "../components/MovieCard";
 import MovieDetailsSkeleton from "../components/subComponents/MovieDetailsSkeleton";
 import { motion } from "motion/react";
 
-
-
-export default function MovieDetails ()
-{
+export default function MovieDetails() {
     const navigate = useNavigate()
-    const { id } = useParams();
-    const [ show, setShow ] = useState<DummyShow | null>( null )
+    const { id } = useParams()
+    const [ show, setShow ] = useState<any | null>( null )
     const timeInHours = show ? Math.floor( show.runtime / 60 ) : 0;
     const timeInMinutes = show ? show.runtime % 60 : 0;
 
-    const getShow = async () =>
-    {
-        setTimeout( () =>
-        {
-            const response = dummyShowsData.find( ( show ) => show._id === id )
-            if ( response )
-            {
-                setShow( response )
-            }
-        }, 2000 )
+    const getShow = async () => {
+        try {
+            const data = await api( "/movies/" + id )
+            setShow( data.data )
+        } catch ( err ) {
+            console.error( 'Error fetching movie:', err )
+        }
     }
 
-    useEffect( () =>
-    {
+    useEffect( () => {
         getShow()
     }, )
-
-
-
 
     return show ? (
         <div className="px-6 md:px-16 lg:px-40 md:pt-50 mt-30">
@@ -53,9 +43,7 @@ export default function MovieDetails ()
                     <motion.div variants={ { hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } } } className="flex items-center gap-2 text-gray-300">
 
                         <StarIcon className="w-5 h-5 text-primary fill-primary" />
-                        {
-                            show.vote_average.toFixed( 1 )
-                        } User Rating
+                        { show.vote_average.toFixed( 1 ) } User Rating
                     </motion.div>
                     <motion.p variants={ { hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } } } className="text-gray-400 mt-2 text-sm leading-tight max-w-xl">{ show.overview }</motion.p>
                     <motion.p variants={ { hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } } }>{ timeInHours > 0
@@ -66,8 +54,7 @@ export default function MovieDetails ()
                             .join( " | " ) }{ " " }. { new Date( show.release_date ).getFullYear() }</motion.p>
                     <motion.div variants={ { hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } } } className="flex items-center flex-wrap gap-4 mt-4">
                         <motion.button whileTap={ { scale: 0.96 } } className="flex items-center gap-2 px-7 py-3 text-sm bg-gray-900 transition rounded-md font-medium cursor-pointer">
-                            <PlayCircleIcon className="w-5 h-5" />
-                            Watch Trailer
+                            <PlayCircleIcon className="w-5 h-5" /> Watch Trailer
                         </motion.button>
                         <motion.a whileTap={ { scale: 0.96 } } href="#dateSelect" className="px-10 py-3 text-sm bg-primary hover:bg-primary transition rounded-md font-medium cursor-pointer">Buy Tickets</motion.a>
                         <motion.button whileTap={ { scale: 0.9 } } className="bg-gray-700 p-2.5 rounded-full transition cursor-pointer">
@@ -86,39 +73,13 @@ export default function MovieDetails ()
             <div className="overflow-x-auto no-scrollbar mt-8 pb-4">
 
                 <div className="flex items-center gap-4 w-max px-4">
-                    {
-                        show.casts.slice( 0, 11 ).map( ( cast ) => (
-                            <motion.div key={ cast.name } initial={ { opacity: 0, y: 10 } } whileInView={ { opacity: 1, y: 0 } } viewport={ { once: true } } transition={ { duration: 0.25 } } className="flex flex-col items-center text-center">
-                                <img src={ cast.profile_path } alt={ cast.name } className="h-20 md:h-20 aspect-square object-cover rounded-full" />
-                                <p className="">{ cast.name }</p>
-                            </motion.div>
-                        ) )
-                    }
-                </div>
-            </div>
-
-            <DateSelect dateTime={ show.release_date } id={ show.id.toString() } />
-
-            <p className="text-lg font-medium mt-20 mb-8">You May Also Like</p>
-
-            <div className="flex flex-wrap max-sm:justify-center gap-8">
-
-                {
-                    dummyShowsData.slice( 0, 4 ).map( ( movie, index ) => (
-                        <MovieCard key={ index } movie={ {
-                            id: movie._id,
-                            genres: movie.genres,
-                            image: movie.backdrop_path,
-                            rating: movie.vote_average,
-                            releaseDate: movie.release_date,
-                            runTime: movie.runtime.toString(),
-                            title: movie.title
-                        } } />
+                    { show?.casts?.slice( 0, 11 ).map( ( cast ) => (
+                        <motion.div key={ cast.name } initial={ { opacity: 0, y: 10 } } whileInView={ { opacity: 1, y: 0 } } viewport={ { once: true } } transition={ { duration: 0.25 } } className="flex flex-col items-center text-center">
+                            <img src={ cast.profile_path } alt={ cast.name } className="h-20 md:h-20 aspect-square object-cover rounded-full" />
+                            <p className="">{ cast.name }</p>
+                        </motion.div>
                     ) )
                 }
-            </div>
-            <div className="flex justify-center mt-20">
-                <button onClick={ () => { navigate( '/movies' ); scrollTo( 0, 0 ) } } className="px-10 py-3 text-sm bg-primary hover:bg-primary-dull transition rounded-md fonbuttonum cursor-pointer">Show more</button>
             </div>
         </div>
     ) : (

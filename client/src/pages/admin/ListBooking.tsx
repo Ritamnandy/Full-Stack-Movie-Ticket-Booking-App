@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
-import { dummyBookingData, type BookingType } from "../../assets/assets";
-import AdminTitle from "../../components/admin/AdminTitle";
-import ListBookingsSkeleton from "../../components/subComponents/ListBookingsSkeleton";
-import { motion } from "motion/react";
-
+import { useEffect, useState } from "react"
+import { dummyBookingData, type BookingType } from "../../assets/assets"
+import AdminTitle from "../../components/admin/AdminTitle"
+import ListBookingsSkeleton from "../../components/subComponents/ListBookingsSkeleton"
+import { motion } from "motion/react"
+import { api } from "../../config/api.config"
 
 export default function ListBooking ()
 {
@@ -12,20 +12,37 @@ export default function ListBooking ()
   const [ loading, setLoading ] = useState( true );
   const [ booking, setBookings ] = useState<BookingType[]>( [] )
 
-
-  const getAllBookingData = () =>
+  const getAllBookingData = async () =>
   {
-    setBookings( dummyBookingData )
-    setLoading( false )
+    try
+    {
+      const data = await api( "/admin/bookings" )
+      setBookings( data.data ?? [] )
+      setLoading( false )
+    } catch ( err )
+    {
+      console.error( 'Error fetching bookings:', err )
+      setLoading( false )
+    }
   }
 
-  useEffect( () =>
-  {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect( () => {
     getAllBookingData()
   }, [] )
 
-
+  const BookingType = {
+    _id: string,
+    user: { name: string },
+    show: {
+      _id: string
+      movie: { title: string }
+      showDateTime: string
+      showPrice: number
+    }
+    amount: number
+    bookedSeats: string[]
+    isPaid: boolean
+  }
 
   return !loading ? (
     <>
@@ -51,12 +68,12 @@ export default function ListBooking ()
                 <td className="p-2">{ book.bookedSeats.length }</td>
                 <td className="p-2">{ currency } { book.amount }</td>
               </motion.tr>
-            ) ) }
+            ) )}
           </tbody>
         </table>
       </div>
     </>
   ) : (
-      <ListBookingsSkeleton />
+    <ListBookingsSkeleton />
   )
 }
